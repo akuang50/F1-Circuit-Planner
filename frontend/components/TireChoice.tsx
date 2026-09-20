@@ -48,8 +48,9 @@ export function TireChoice({ advice }: { advice: TireAdvice }) {
       </ul>
       {!advice.precipUsable ? (
         <p className="mt-3 text-xs text-amber">
-          ISD precipitation at this station is limited. The wet/dry split uses the circuit’s climate family instead of a
-          rain percentage.
+          {advice.era5Used
+            ? "ISD precipitation at this station is limited. The wet/dry split uses Open-Meteo ERA5 rain-day climate at the circuit, not a stuck rain percentage."
+            : "ISD precipitation at this station is limited. The wet/dry split uses the circuit’s climate family instead of a rain percentage."}
         </p>
       ) : null}
     </div>

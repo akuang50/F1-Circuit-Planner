@@ -8,16 +8,19 @@ import { Counterfactual } from "@/components/Counterfactual";
 import { ExposureList, MetricBar } from "@/components/MetricBar";
 import { HourlyChart } from "@/components/HourlyChart";
 import { Provenance } from "@/components/Provenance";
+import { RaceClimatePanel } from "@/components/RaceClimatePanel";
 import { RaceSlider } from "@/components/RaceSlider";
 import { ScheduleCard } from "@/components/ScheduleCard";
 import { MONTHS, hourLabel } from "@/lib/api";
 import { CIRCUIT_SELECT_EVENT } from "@/lib/circuitNav";
 import { hoursForMonth, loadDataset, provenanceFor, type StaticDataset } from "@/lib/dataset";
+import { loadExtras } from "@/lib/extras";
 import { exposureForWindow, flexibilityWindow } from "@/lib/exposure";
 import { optimize } from "@/lib/optimizer";
 import type {
   CandidateSchedule,
   Circuit,
+  ExtrasDataset,
   OptimizeResponse,
   ScenarioResponse,
   WeatherByHourResponse,
@@ -33,6 +36,7 @@ const ORIGINAL_START = 16;
 
 export function Dashboard() {
   const [dataset, setDataset] = useState<StaticDataset | null>(null);
+  const [extras, setExtras] = useState<ExtrasDataset | null>(null);
   const [circuits, setCircuits] = useState<Circuit[]>([]);
   const [circuitId, setCircuitId] = useState("silverstone");
   const [month, setMonth] = useState(7);
@@ -56,6 +60,13 @@ export function Dashboard() {
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);
+      });
+    loadExtras()
+      .then((data) => {
+        if (!cancelled) setExtras(data);
+      })
+      .catch(() => {
+        if (!cancelled) setExtras(null);
       });
     return () => {
       cancelled = true;
@@ -156,7 +167,7 @@ export function Dashboard() {
   useEffect(() => {
     function scrollToHash() {
       const id = window.location.hash.slice(1);
-      if (id !== "layout" && id !== "weather" && id !== "calendar") return;
+      if (id !== "layout" && id !== "weather" && id !== "calendar" && id !== "datasets") return;
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     window.addEventListener("hashchange", scrollToHash);
@@ -173,6 +184,15 @@ export function Dashboard() {
     }, 160);
     return () => window.clearTimeout(timer);
   }, [circuitId, layoutReady]);
+
+  useEffect(() => {
+    if (!extras) return;
+    if (window.location.hash !== "#datasets") return;
+    const timer = window.setTimeout(() => {
+      document.getElementById("datasets")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 160);
+    return () => window.clearTimeout(timer);
+  }, [circuitId, extras]);
 
   async function generateScenarios() {
     if (!hourly || !dataset) return;
@@ -292,6 +312,9 @@ export function Dashboard() {
         <a href="#layout" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
           3D layout and tyres
         </a>
+        <a href="#datasets" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
+          Race-day climate
+        </a>
         <a href="#calendar" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
           2026 calendar
         </a>
@@ -302,12 +325,19 @@ export function Dashboard() {
       ) : null}
 
       {circuit && afternoonExposure ? (
-        <CircuitGuidePanel circuitId={circuit.id} month={month} exposure={afternoonExposure} />
+        <CircuitGuidePanel
+          circuitId={circuit.id}
+          month={month}
+          exposure={afternoonExposure}
+          extras={extras}
+        />
       ) : (
         <section id="layout" className="scroll-mt-24 rounded-3xl border border-stroke bg-panel p-5">
           <p className="text-muted">Loading 3D layout…</p>
         </section>
       )}
+
+      {extras ? <RaceClimatePanel circuitId={circuitId} month={month} extras={extras} /> : null}
 
       <section id="weather" className="scroll-mt-24 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">

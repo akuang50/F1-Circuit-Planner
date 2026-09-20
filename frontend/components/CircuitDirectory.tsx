@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MONTHS } from "@/lib/api";
 import { CALENDAR_2026, HISTORY_CIRCUITS } from "@/lib/circuitCatalog";
 import { getCircuitGuide } from "@/lib/circuitGuides";
-import { layoutHref, selectCircuit } from "@/lib/circuitNav";
+import { datasetsHref, layoutHref, selectCircuit } from "@/lib/circuitNav";
 import { CircuitThumb } from "@/components/CircuitDiagram";
 
 const LEGENDS = [...HISTORY_CIRCUITS].sort((a, b) => b.races - a.races).slice(0, 12);
@@ -44,6 +44,14 @@ export function CircuitDirectory() {
                 className="mt-2 inline-block text-sm text-teal hover:underline"
               >
                 Weather planner
+              </Link>
+              {" · "}
+              <Link
+                href={datasetsHref(circuit.id)}
+                onClick={() => selectCircuit(circuit.id)}
+                className="mt-2 inline-block text-sm text-teal hover:underline"
+              >
+                Race-day climate
               </Link>
             </li>
             );

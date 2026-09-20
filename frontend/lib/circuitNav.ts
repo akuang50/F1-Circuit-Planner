@@ -8,3 +8,7 @@ export function selectCircuit(id: string) {
 export function layoutHref(circuitId: string): string {
   return `/?circuit=${circuitId}#layout`;
 }
+
+export function datasetsHref(circuitId: string): string {
+  return `/?circuit=${circuitId}#datasets`;
+}

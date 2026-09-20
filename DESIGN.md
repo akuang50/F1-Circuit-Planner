@@ -4,7 +4,7 @@ Hackathon MVP. Product principles live in the original briefing; this file recor
 
 ## What this is
 
-A **historical scenario and scheduling analysis** tool. It never claims a correct race time and does not mix forecasts into ISD climatology.
+A **historical scenario and scheduling analysis** tool. It never claims a correct race time and does not mix forecasts into ISD climatology. Extra public datasets (ERA5, Jolpica, OpenF1) are baked into `extras.json` so GitHub Pages can say more about race-day climate without API keys.
 
 ## Data
 
@@ -36,6 +36,16 @@ Local hour uses `zoneinfo` (`Europe/London`), including BST.
 Configurable in `data/metadata/thresholds.json`. UI copy describes them as historical frequencies, never “unsafe”.
 
 Rain probability is the share of observations **with a precipitation or present-weather field** that meet the rain rule. Hours with neither field are excluded from that ratio (they still count in `n` for the window).
+
+## Extra public datasets
+
+Baked by `scripts/ingest_extras.py` into `frontend/public/data/extras.json` (no API keys):
+
+- Open-Meteo Archive ERA5 daily (2010–2026) at each circuit lat/lon → monthly rain-day climate, typical sunrise/sunset, mean temperature
+- Jolpica/Ergast race dates and winners, joined to ERA5 so the UI can say “of N GPs since 2010, ERA5 shows ≥1 mm on race day for M”
+- OpenF1 session weather from 2023 (track/air temperature, humidity, rainfall flag). Numeric fields only; F1 media URLs are not copied into the repo
+
+ERA5 is reanalysis at the venue that day, not a lap-by-lap race log. When NOAA ISD precipitation is missing or stuck at 0/1, tyre advice leans on ERA5 rain-day fraction instead of the ISD percentage.
 
 ## Architecture
 

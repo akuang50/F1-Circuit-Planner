@@ -173,3 +173,86 @@ export type ClimateProfileResponse = {
   months: MonthlyExposure[];
   provenance: StationProvenance;
 };
+
+export type ExtraSource = {
+  id: string;
+  name: string;
+  url: string;
+  note: string;
+};
+
+export type Era5MonthClimate = {
+  month: number;
+  days: number;
+  rain_days: number;
+  rain_day_fraction: number | null;
+  mean_precip_mm: number | null;
+  mean_temp_c: number | null;
+  max_temp_c: number | null;
+  min_temp_c: number | null;
+  mean_wind_kmh: number | null;
+  mean_gust_kmh: number | null;
+  mean_precip_hours: number | null;
+  storm_day_fraction: number | null;
+  fog_day_fraction: number | null;
+  median_sunrise: string | null;
+  median_sunset: string | null;
+  daylight_hours: number | null;
+};
+
+export type RaceDayClimate = {
+  season: number;
+  round: number;
+  date: string;
+  event: string;
+  winner?: string | null;
+  status?: string | null;
+  laps?: number | null;
+  precip_mm: number | null;
+  wet: boolean | null;
+  temp_mean_c: number | null;
+  weather_code?: number | null;
+};
+
+export type RaceDaySummary = {
+  races: number;
+  wet_races: number;
+  wet_fraction: number | null;
+  mean_precip_mm: number | null;
+  mean_temp_c: number | null;
+  first_season: number | null;
+  last_season: number | null;
+};
+
+export type OpenF1SessionWeather = {
+  name?: string;
+  samples: number;
+  rainfall_fraction: number | null;
+  mean_track_temp_c: number | null;
+  mean_air_temp_c: number | null;
+  mean_humidity: number | null;
+  mean_wind_ms: number | null;
+};
+
+export type OpenF1MeetingWeather = OpenF1SessionWeather & {
+  year: number;
+  meeting_name: string | null;
+  date_start: string | null;
+  sessions?: OpenF1SessionWeather[];
+};
+
+export type CircuitExtras = {
+  elevation_m: number | null;
+  climate: Era5MonthClimate[];
+  race_days: RaceDayClimate[];
+  race_day_summary: RaceDaySummary;
+  openf1: OpenF1MeetingWeather[];
+};
+
+export type ExtrasDataset = {
+  generated_at: string;
+  period: { start: string; end: string };
+  rain_day_mm: number;
+  sources: ExtraSource[];
+  circuits: Record<string, CircuitExtras>;
+};

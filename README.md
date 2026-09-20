@@ -6,11 +6,11 @@ This is **not a forecast**. It turns NOAA Integrated Surface Database (ISD) obse
 
 > If the British Grand Prix moved from 16:00 to 13:00, how would historical precipitation, gust and visibility exposure change?
 
-Data: [NOAA ISD on AWS Open Data](https://registry.opendata.aws/noaa-isd/).
+Data: [NOAA ISD on AWS Open Data](https://registry.opendata.aws/noaa-isd/), plus baked [Open-Meteo ERA5](https://open-meteo.com/en/docs/historical-weather-api) daily climate, [Jolpica](https://api.jolpi.ca/ergast/f1/) race dates, and [OpenF1](https://openf1.org/) session weather.
 
 ## GitHub Pages
 
-The planner is a static Next.js export. NOAA hourly/monthly profiles ship as `frontend/public/data/app.json`. The weekend optimizer runs in the browser, so GitHub Pages does not need FastAPI.
+The planner is a static Next.js export. NOAA hourly/monthly profiles ship as `frontend/public/data/app.json`. Extra public datasets (ERA5 climate, Jolpica GP dates, OpenF1 session weather) ship as `frontend/public/data/extras.json`. The weekend optimizer runs in the browser, so GitHub Pages does not need FastAPI.
 
 Live URL after Pages is enabled: `https://<user>.github.io/<repo>/`
 
@@ -42,6 +42,7 @@ Refresh `app.json` after regenerating parquet profiles:
 
 ```bash
 python3 scripts/export_static_data.py
+python3 scripts/ingest_extras.py
 ```
 
 ## Demo loop
@@ -55,11 +56,11 @@ python3 scripts/export_static_data.py
 
 ## Stack
 
-- **Data:** NOAA ISD global-hourly CSV from `s3://noaa-global-hourly-pds`
+- **Data:** NOAA ISD global-hourly CSV from `s3://noaa-global-hourly-pds`, Open-Meteo ERA5 daily climate, Jolpica race calendar, OpenF1 session weather
 - **Weather circuits:** 2026 calendar plus Bahrain, Jeddah and Imola, each pinned to a nearby ISD station in `data/metadata/stations.json`
 - **History:** every World Championship venue since 1950 on `/circuits`
 - **Static app:** Next.js export, TypeScript optimizer, Tailwind, Leaflet
-- **Optional pipeline:** `python3 scripts/ingest_all.py` then `python3 scripts/export_static_data.py`
+- **Optional pipeline:** `python3 scripts/ingest_all.py` then `python3 scripts/export_static_data.py` and `python3 scripts/ingest_extras.py`
 
 ## Local development
 
