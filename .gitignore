@@ -1,3 +1,14 @@
+# Python
+backend/.venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# NOAA ISD raw downloads (large). Processed parquet is committed.
+data/raw/
+
 # Logs
 logs
 *.log
