@@ -219,7 +219,7 @@ export function Dashboard() {
             Circuit history
           </Link>
           <Link
-            href="/climate"
+            href={`/climate?circuit=${circuitId}`}
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
           >
             Climate profile
