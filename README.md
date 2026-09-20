@@ -27,15 +27,15 @@ npm run build
 npx --yes serve out
 ```
 
-To mimic a project-pages URL (`/f1-circuit-planner/`):
+To mimic a project-pages URL (`/F1-Circuit-Planner/`):
 
 ```bash
 cd frontend
-NEXT_PUBLIC_BASE_PATH=/f1-circuit-planner npm run build
-mkdir -p /tmp/pages-preview/f1-circuit-planner
-cp -R out/. /tmp/pages-preview/f1-circuit-planner/
+NEXT_PUBLIC_BASE_PATH=/F1-Circuit-Planner npm run build
+mkdir -p /tmp/pages-preview/F1-Circuit-Planner
+cp -R out/. /tmp/pages-preview/F1-Circuit-Planner/
 npx --yes serve /tmp/pages-preview
-# open http://localhost:3000/f1-circuit-planner/
+# open http://localhost:3000/F1-Circuit-Planner/
 ```
 
 Refresh `app.json` after regenerating parquet profiles:
