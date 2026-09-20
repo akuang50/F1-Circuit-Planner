@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { HISTORY_YEARS, yearsFromSeasons } from "@/lib/circuitCatalog";
+import { layoutHref } from "@/lib/circuitNav";
 import type { CircuitHistoryEntry } from "@/types/api";
 
 export function YearSchedule({ circuits }: { circuits: CircuitHistoryEntry[] }) {
@@ -52,8 +53,8 @@ export function YearSchedule({ circuits }: { circuits: CircuitHistoryEntry[] }) 
                 <Link href={`/?circuit=${row.weather_circuit_id}`} className="text-sm text-teal hover:underline">
                   Open weather planner
                 </Link>
-                <Link href={`/circuits/${row.weather_circuit_id}`} className="text-sm text-teal hover:underline">
-                  Layout and tyres
+                <Link href={layoutHref(row.weather_circuit_id)} className="text-sm text-teal hover:underline">
+                  3D layout and tyres
                 </Link>
               </p>
             ) : (
@@ -129,8 +130,8 @@ export function CircuitTable({ circuits }: { circuits: CircuitHistoryEntry[] }) 
                 </td>
                 <td className="py-3">
                   {row.weather_circuit_id ? (
-                    <Link href={`/circuits/${row.weather_circuit_id}`} className="text-teal hover:underline">
-                      Layout and tyres
+                    <Link href={layoutHref(row.weather_circuit_id)} className="text-teal hover:underline">
+                      3D layout and tyres
                     </Link>
                   ) : (
                     <span className="text-muted">—</span>

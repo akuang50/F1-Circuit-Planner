@@ -4,6 +4,7 @@ import { CircuitDetail } from "@/components/CircuitDetail";
 import { CircuitThumb } from "@/components/CircuitDiagram";
 import { WEATHER_CIRCUITS } from "@/lib/circuitCatalog";
 import { allCircuitGuides, getCircuitGuide } from "@/lib/circuitGuides";
+import { layoutHref } from "@/lib/circuitNav";
 
 export function generateStaticParams() {
   return allCircuitGuides().map((guide) => ({ id: guide.id }));
@@ -41,7 +42,7 @@ export default async function CircuitPage({ params }: { params: Promise<{ id: st
             return (
               <li key={row.id}>
                 <Link
-                  href={`/circuits/${row.id}`}
+                  href={layoutHref(row.id)}
                   className="block rounded-2xl border border-stroke bg-black/30 px-3 py-2 hover:border-white/30"
                 >
                   {otherGuide ? <CircuitThumb guide={otherGuide} className="h-14 w-full" /> : null}

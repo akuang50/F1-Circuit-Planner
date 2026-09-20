@@ -11,6 +11,7 @@ import { Provenance } from "@/components/Provenance";
 import { RaceSlider } from "@/components/RaceSlider";
 import { ScheduleCard } from "@/components/ScheduleCard";
 import { MONTHS, hourLabel } from "@/lib/api";
+import { CIRCUIT_SELECT_EVENT } from "@/lib/circuitNav";
 import { hoursForMonth, loadDataset, provenanceFor, type StaticDataset } from "@/lib/dataset";
 import { exposureForWindow, flexibilityWindow } from "@/lib/exposure";
 import { optimize } from "@/lib/optimizer";
@@ -130,7 +131,48 @@ export function Dashboard() {
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("circuit");
     if (fromUrl) setCircuitId(fromUrl);
+    function onSelect(event: Event) {
+      const id = (event as CustomEvent<{ id?: string }>).detail?.id;
+      if (id) setCircuitId(id);
+    }
+    function onPop() {
+      const next = new URLSearchParams(window.location.search).get("circuit");
+      if (next) setCircuitId(next);
+    }
+    window.addEventListener(CIRCUIT_SELECT_EVENT, onSelect);
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener(CIRCUIT_SELECT_EVENT, onSelect);
+      window.removeEventListener("popstate", onPop);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!dataset) return;
+    const next = dataset.circuits.find((item) => item.id === circuitId);
+    if (next?.typical_month) setMonth(next.typical_month);
+  }, [circuitId, dataset]);
+
+  useEffect(() => {
+    function scrollToHash() {
+      const id = window.location.hash.slice(1);
+      if (id !== "layout" && id !== "weather" && id !== "calendar") return;
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    window.addEventListener("hashchange", scrollToHash);
+    return () => window.removeEventListener("hashchange", scrollToHash);
+  }, []);
+
+  const layoutReady = Boolean(afternoonExposure);
+
+  useEffect(() => {
+    if (!layoutReady) return;
+    if (window.location.hash !== "#layout") return;
+    const timer = window.setTimeout(() => {
+      document.getElementById("layout")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 160);
+    return () => window.clearTimeout(timer);
+  }, [circuitId, layoutReady]);
 
   async function generateScenarios() {
     if (!hourly || !dataset) return;
@@ -190,6 +232,9 @@ export function Dashboard() {
                 setCircuitId(nextId);
                 const nextCircuit = dataset?.circuits.find((item) => item.id === nextId);
                 if (nextCircuit?.typical_month) setMonth(nextCircuit.typical_month);
+                const url = new URL(window.location.href);
+                url.searchParams.set("circuit", nextId);
+                window.history.replaceState(null, "", url);
               }}
             >
               {(circuits.length ? circuits : [{ id: "silverstone", name: "Silverstone Circuit" }]).map((item) => (
@@ -213,12 +258,12 @@ export function Dashboard() {
               ))}
             </select>
           </label>
-          <Link
-            href={`/circuits/${circuitId}`}
+          <a
+            href="#layout"
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
           >
-            Circuit diagram
-          </Link>
+            3D layout
+          </a>
           <Link
             href="/circuits"
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
@@ -240,11 +285,31 @@ export function Dashboard() {
         </div>
       </header>
 
+      <nav className="flex flex-wrap gap-2 text-sm">
+        <a href="#weather" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
+          Weather planner
+        </a>
+        <a href="#layout" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
+          3D layout and tyres
+        </a>
+        <a href="#calendar" className="rounded-full border border-stroke px-3 py-1.5 hover:border-white/30">
+          2026 calendar
+        </a>
+      </nav>
+
       {error ? (
         <p className="rounded-xl border border-f1/40 bg-f1/10 px-4 py-3 text-sm">{error}</p>
       ) : null}
 
-      <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      {circuit && afternoonExposure ? (
+        <CircuitGuidePanel circuitId={circuit.id} month={month} exposure={afternoonExposure} />
+      ) : (
+        <section id="layout" className="scroll-mt-24 rounded-3xl border border-stroke bg-panel p-5">
+          <p className="text-muted">Loading 3D layout…</p>
+        </section>
+      )}
+
+      <section id="weather" className="scroll-mt-24 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
           <div className="rounded-3xl border border-stroke bg-panel p-5">
             <p className="text-xs uppercase tracking-[0.2em] text-muted">Historical weather profile</p>
@@ -302,10 +367,6 @@ export function Dashboard() {
           {circuit && profile ? <CircuitMap circuit={circuit} provenance={profile.provenance} /> : null}
         </div>
       </section>
-
-      {circuit && afternoonExposure ? (
-        <CircuitGuidePanel circuitId={circuit.id} month={month} exposure={afternoonExposure} />
-      ) : null}
 
       <section className="rounded-3xl border border-stroke bg-panel p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

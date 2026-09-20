@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CircuitDiagram, ElevationProfile } from "@/components/CircuitDiagram";
+import { CircuitTrack3D } from "@/components/CircuitTrack3D";
 import { TireChoice } from "@/components/TireChoice";
 import { MONTHS } from "@/lib/api";
 import { getCircuitGuide, type CircuitGuide } from "@/lib/circuitGuides";
+import { layoutHref } from "@/lib/circuitNav";
 import { hoursForMonth, loadDataset, monthlyForCircuit, type StaticDataset } from "@/lib/dataset";
 import { exposureForWindow, exposureFromMonthly } from "@/lib/exposure";
 import { adviseTires } from "@/lib/tireAdvice";
@@ -53,8 +55,8 @@ export function CircuitDetail({ circuit }: { circuit: Circuit }) {
             ))}
           </select>
         </label>
-        <Link href={`/?circuit=${circuit.id}`} className="self-end rounded-xl border border-stroke px-4 py-2 text-sm">
-          Open planner
+        <Link href={layoutHref(circuit.id)} className="self-end rounded-xl border border-stroke px-4 py-2 text-sm">
+          Open on main page
         </Link>
         <Link
           href={`/climate?circuit=${circuit.id}`}
@@ -83,6 +85,7 @@ function GuideBody({
   return (
     <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
       <div className="space-y-4">
+        <CircuitTrack3D guide={guide} wet={wet} />
         <CircuitDiagram guide={guide} wet={wet} title={guide.id} />
         <ElevationProfile guide={guide} />
       </div>
