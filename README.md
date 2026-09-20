@@ -8,6 +8,42 @@ This is **not a forecast**. It turns NOAA Integrated Surface Database (ISD) obse
 
 Data: [NOAA ISD on AWS Open Data](https://registry.opendata.aws/noaa-isd/).
 
+## GitHub Pages
+
+The planner is a static Next.js export. NOAA hourly/monthly profiles ship as `frontend/public/data/app.json`. The weekend optimizer runs in the browser, so GitHub Pages does not need FastAPI.
+
+Live URL after Pages is enabled: `https://<user>.github.io/<repo>/`
+
+1. Merge this branch (or push to `main`).
+2. In the repo: **Settings → Pages → Source: GitHub Actions**.
+3. The workflow `.github/workflows/pages.yml` builds `frontend/` with `NEXT_PUBLIC_BASE_PATH=/<repo>` and deploys `frontend/out`.
+
+Local preview of the same static export:
+
+```bash
+cd frontend
+npm install
+npm run build
+npx --yes serve out
+```
+
+To mimic a project-pages URL (`/F1-Circuit-Planner/`):
+
+```bash
+cd frontend
+NEXT_PUBLIC_BASE_PATH=/F1-Circuit-Planner npm run build
+mkdir -p /tmp/pages-preview/F1-Circuit-Planner
+cp -R out/. /tmp/pages-preview/F1-Circuit-Planner/
+npx --yes serve /tmp/pages-preview
+# open http://localhost:3000/F1-Circuit-Planner/
+```
+
+Refresh `app.json` after regenerating parquet profiles:
+
+```bash
+python3 scripts/export_static_data.py
+```
+
 ## Demo loop
 
 1. Open the app on Silverstone / July.
@@ -21,25 +57,28 @@ Data: [NOAA ISD on AWS Open Data](https://registry.opendata.aws/noaa-isd/).
 
 - **Data:** NOAA ISD global-hourly CSV from `s3://noaa-global-hourly-pds` (same dataset as `s3://noaa-isd-pds`)
 - **Station:** Church Lawford `03544099999`, ~39 km from Silverstone, 2010–2025
-- **Backend:** Python, FastAPI, Polars, DuckDB
-- **Frontend:** Next.js, TypeScript, Tailwind, Recharts, Leaflet
+- **Static app:** Next.js export, TypeScript optimizer, Tailwind, Leaflet
+- **Optional pipeline:** Python, FastAPI, Polars, DuckDB (download/parse NOAA ISD and rebuild JSON)
 
-## Quick start
+## Local development
 
 ```bash
-# Python API
-python3 -m venv backend/.venv
-backend/.venv/bin/pip install -r backend/requirements.txt
-backend/.venv/bin/python scripts/seed_demo_data.py   # downloads NOAA ISD if missing
-cd backend && ../backend/.venv/bin/uvicorn main:app --reload --port 8000
-
-# Frontend (separate terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). API docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+Open [http://localhost:3000](http://localhost:3000). Profiles load from `/data/app.json`; no API process is required.
+
+Optional Python API (rebuilds features / serves the same analytics over HTTP):
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -r backend/requirements.txt
+backend/.venv/bin/python scripts/seed_demo_data.py   # downloads NOAA ISD if missing
+python3 scripts/export_static_data.py
+cd backend && ../backend/.venv/bin/uvicorn main:app --reload --port 8000
+```
 
 Processed hourly/monthly profiles are stored in `data/processed/`. Raw yearly CSV files stay in `data/raw/` and are gitignored.
 

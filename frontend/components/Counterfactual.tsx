@@ -1,7 +1,9 @@
-import type { ScenarioResponse } from "@/types/api";
+import type { ScenarioResponse, WeatherExposure } from "@/types/api";
 import { pct, pp } from "@/lib/api";
 
-const ROWS: { key: keyof ScenarioResponse["original"]; label: string }[] = [
+type ExposureMetric = Exclude<keyof WeatherExposure, "observation_count" | "limited_sample">;
+
+const ROWS: { key: ExposureMetric; label: string }[] = [
   { key: "precipitation", label: "Precipitation" },
   { key: "strong_gust", label: "Strong gusts" },
   { key: "low_visibility", label: "Low visibility" },
