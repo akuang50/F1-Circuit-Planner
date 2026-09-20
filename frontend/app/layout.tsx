@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Unbounded } from "next/font/google";
+import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
 const display = Unbounded({
@@ -26,7 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${display.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col grid-fade">{children}</body>
+      <body className="min-h-full flex flex-col grid-fade">
+        <SiteNav />
+        {children}
+      </body>
     </html>
   );
 }
