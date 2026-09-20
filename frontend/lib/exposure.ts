@@ -1,4 +1,4 @@
-import type { HourlyProfile, WeatherExposure } from "@/types/api";
+import type { HourlyProfile, MonthlyExposure, WeatherExposure } from "@/types/api";
 
 function emptyExposure(): WeatherExposure {
   return {
@@ -113,6 +113,20 @@ export function flexibilityWindow(
     window_end_hour,
     flexibility_minutes: Math.max(0, (window_end_hour - window_start_hour) * 60),
     note: "Historical scheduling flexibility, not a safety guarantee.",
+  };
+}
+
+export function exposureFromMonthly(row: MonthlyExposure | undefined): WeatherExposure {
+  if (!row) return emptyExposure();
+  return {
+    precipitation: row.rain_probability ?? 0,
+    strong_wind: 0,
+    strong_gust: row.strong_gust_probability ?? 0,
+    low_visibility: row.low_visibility_probability ?? 0,
+    temperature_extreme: row.high_temperature_probability ?? 0,
+    volatility: row.volatility_index ?? 0,
+    observation_count: row.observation_count,
+    limited_sample: row.observation_count < 200,
   };
 }
 

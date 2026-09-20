@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CircuitGuidePanel } from "@/components/CircuitGuidePanel";
 import { Provenance } from "@/components/Provenance";
 import { MONTHS, pct } from "@/lib/api";
 import { loadDataset, monthlyForCircuit, provenanceFor, type StaticDataset } from "@/lib/dataset";
+import { exposureFromMonthly } from "@/lib/exposure";
 import type { Circuit, ClimateProfileResponse } from "@/types/api";
 
 export default function ClimatePage() {
@@ -73,6 +75,13 @@ export default function ClimatePage() {
         </div>
       </div>
       {error ? <p className="text-f1">{error}</p> : null}
+      {data ? (
+        <CircuitGuidePanel
+          circuitId={data.circuit.id}
+          month={data.circuit.typical_month ?? 7}
+          exposure={exposureFromMonthly(data.months.find((row) => row.month === (data.circuit.typical_month ?? 7)))}
+        />
+      ) : null}
       <div className="overflow-x-auto rounded-3xl border border-stroke bg-panel p-5">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.16em] text-muted">
