@@ -1,0 +1,33 @@
+{
+  "comment": "Stations are pinned explicitly so results are reproducible. Nearest is not assumed best.",
+  "source": "NOAA Integrated Surface Database (ISD) via AWS Open Data (s3://noaa-isd-pds, s3://noaa-global-hourly-pds)",
+  "registry": "https://registry.opendata.aws/noaa-isd/",
+  "mappings": [
+    {
+      "circuit_id": "silverstone",
+      "station_id": "03544099999",
+      "usaf": "035440",
+      "wban": "99999",
+      "station_name": "CHURCH LAWFORD",
+      "country": "UK",
+      "latitude": 52.3666666,
+      "longitude": -1.3333333,
+      "elevation_m": 106.0,
+      "distance_km": 39.1,
+      "start_year": 2010,
+      "end_year": 2025,
+      "record_begin": "19830824",
+      "record_end": "20250824",
+      "rationale": "Met Office synoptic climate station with a long, continuous hourly record and 1-hour precipitation. Cranfield (03557399999, ~27 km) is closer but is an aerodrome METAR series; Church Lawford is preferred for climatological precipitation and wind statistics."
+    }
+  ],
+  "alternatives": [
+    {
+      "circuit_id": "silverstone",
+      "station_id": "03557399999",
+      "station_name": "CRANFIELD",
+      "distance_km": 27.4,
+      "note": "Closer geographically; aerodrome METAR. Not used for the MVP."
+    }
+  ]
+}

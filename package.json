@@ -1,0 +1,8 @@
+{
+  "name": "f1-weather-resilience",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "backend/.venv/bin/uvicorn main:app --reload --port 8000 --app-dir backend"
+  }
+}

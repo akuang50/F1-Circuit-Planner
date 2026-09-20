@@ -1,0 +1,45 @@
+{
+  "comment": "These are configurable analysis thresholds, not operational safety limits. UI copy must describe them as historical observation frequencies.",
+  "precipitation_mm": {
+    "value": 0.1,
+    "label": "Historical frequency of measurable precipitation",
+    "description": "An observation is counted as a precipitation event when 1-hour precipitation is at least 0.1 mm."
+  },
+  "strong_wind_ms": {
+    "value": 5.0,
+    "label": "Historical frequency of observations above the selected wind threshold",
+    "description": "Mean wind speed of 5 m/s (~10 kt). Inland Midlands stations are relatively sheltered; this is a breezy threshold, not an operational safety limit."
+  },
+  "strong_gust_ms": {
+    "value": 10.0,
+    "label": "Historical frequency of observations above the selected gust threshold",
+    "description": "Peak/gust speed of 10 m/s (~19 kt). Not labelled unsafe."
+  },
+  "low_visibility_m": {
+    "value": 5000,
+    "label": "Historical frequency of observations below the selected visibility threshold",
+    "description": "Visibility under 5 km. Not labelled as a racing-safety judgment."
+  },
+  "high_temperature_c": {
+    "value": 25.0,
+    "label": "Historical frequency of observations above the selected temperature threshold",
+    "description": "Dry-bulb temperature of 25 C or higher."
+  },
+  "volatility": {
+    "temp_scale_c": 5.0,
+    "wind_scale_ms": 5.0,
+    "visibility_scale_m": 5000.0,
+    "weights": {
+      "temperature": 0.25,
+      "wind": 0.25,
+      "precipitation_transition": 0.3,
+      "visibility": 0.2
+    },
+    "labels": {
+      "low_max": 0.12,
+      "medium_max": 0.28
+    }
+  },
+  "flexibility_tolerance": 0.03,
+  "model_version": "0.1.0-hackathon"
+}

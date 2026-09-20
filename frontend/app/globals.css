@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --background: #070708;
+  --foreground: #f4f1ea;
+  --panel: #111114;
+  --panel-2: #18181c;
+  --stroke: rgba(255, 255, 255, 0.08);
+  --muted: #9a958c;
+  --red: #e10600;
+  --teal: #00d2be;
+  --amber: #f2b90d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-stroke: var(--stroke);
+  --color-muted: var(--muted);
+  --color-f1: var(--red);
+  --color-teal: var(--teal);
+  --color-amber: var(--amber);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  min-height: 100%;
+  background-image:
+    radial-gradient(circle at top, rgba(225, 6, 0, 0.16), transparent 34%),
+    linear-gradient(180deg, #0b0b0d 0%, #070708 100%);
+  font-family: var(--font-display), "Segoe UI", sans-serif;
+}
+
+.font-mono,
+time,
+input[type="range"] + div {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.grid-fade {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.leaflet-container {
+  background: #0d0d10;
+  font-family: inherit;
+}

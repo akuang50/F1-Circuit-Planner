@@ -1,0 +1,31 @@
+{
+  "raw_count": 135150,
+  "missing_precipitation": 102072,
+  "missing_gust": 94924,
+  "valid_count": 135150,
+  "missing_temperature": 141,
+  "missing_visibility": 1666,
+  "missing_wind": 31,
+  "circuit_id": "silverstone",
+  "station_id": "03544099999",
+  "timezone": "Europe/London",
+  "files": [
+    "2010.csv",
+    "2011.csv",
+    "2012.csv",
+    "2013.csv",
+    "2014.csv",
+    "2015.csv",
+    "2016.csv",
+    "2017.csv",
+    "2018.csv",
+    "2019.csv",
+    "2020.csv",
+    "2021.csv",
+    "2022.csv",
+    "2023.csv",
+    "2024.csv",
+    "2025.csv"
+  ],
+  "row_count": 135150
+}

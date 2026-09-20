@@ -1,0 +1,63 @@
+{
+  "comment": "Prototype session assumptions, not official FIA sporting regulations.",
+  "baseline_event": "British Grand Prix weekend (illustrative)",
+  "min_gap_minutes": 120,
+  "step_minutes": 30,
+  "sessions": [
+    {
+      "id": "fp1",
+      "name": "FP1",
+      "day_offset": 0,
+      "day_name": "Friday",
+      "duration_minutes": 60,
+      "earliest_start": "09:00",
+      "latest_end": "14:00",
+      "required_after": [],
+      "baseline_start": "12:30"
+    },
+    {
+      "id": "fp2",
+      "name": "FP2",
+      "day_offset": 0,
+      "day_name": "Friday",
+      "duration_minutes": 60,
+      "earliest_start": "13:00",
+      "latest_end": "18:30",
+      "required_after": ["fp1"],
+      "baseline_start": "16:00"
+    },
+    {
+      "id": "fp3",
+      "name": "FP3",
+      "day_offset": 1,
+      "day_name": "Saturday",
+      "duration_minutes": 60,
+      "earliest_start": "09:00",
+      "latest_end": "13:30",
+      "required_after": [],
+      "baseline_start": "11:30"
+    },
+    {
+      "id": "qualifying",
+      "name": "Qualifying",
+      "day_offset": 1,
+      "day_name": "Saturday",
+      "duration_minutes": 60,
+      "earliest_start": "12:00",
+      "latest_end": "18:00",
+      "required_after": ["fp3"],
+      "baseline_start": "15:00"
+    },
+    {
+      "id": "race",
+      "name": "Race",
+      "day_offset": 2,
+      "day_name": "Sunday",
+      "duration_minutes": 120,
+      "earliest_start": "12:00",
+      "latest_end": "18:00",
+      "required_after": ["qualifying"],
+      "baseline_start": "15:00"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "circuits": [
+    {
+      "id": "silverstone",
+      "name": "Silverstone Circuit",
+      "country": "United Kingdom",
+      "latitude": 52.0736,
+      "longitude": -1.0169,
+      "timezone": "Europe/London",
+      "elevation_m": 153
+    }
+  ]
+}
