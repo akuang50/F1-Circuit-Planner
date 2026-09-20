@@ -6,6 +6,9 @@ export type Circuit = {
   longitude: number;
   timezone: string;
   elevation_m: number | null;
+  event?: string;
+  typical_month?: number;
+  current_2026?: boolean;
 };
 
 export type WeatherExposure = {
@@ -43,6 +46,7 @@ export type StationProvenance = {
 };
 
 export type HourlyProfile = {
+  circuit_id?: string;
   month?: number;
   hour: number;
   observation_count: number;
@@ -134,6 +138,7 @@ export type OptimizeResponse = {
 };
 
 export type MonthlyExposure = {
+  circuit_id?: string;
   month: number;
   observation_count: number;
   rain_probability: number | null;
@@ -142,6 +147,25 @@ export type MonthlyExposure = {
   high_temperature_probability: number | null;
   volatility_index: number | null;
   volatility_label: "LOW" | "MEDIUM" | "HIGH" | null;
+};
+
+export type CircuitHistoryEntry = {
+  id: string;
+  name: string;
+  country: string;
+  location: string;
+  type: string;
+  grands_prix: string[];
+  seasons: string;
+  races: number;
+  weather_circuit_id?: string;
+  current_2026?: boolean;
+};
+
+export type CircuitHistory = {
+  source: string;
+  note?: string;
+  circuits: CircuitHistoryEntry[];
 };
 
 export type ClimateProfileResponse = {

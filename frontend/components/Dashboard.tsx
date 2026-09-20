@@ -10,7 +10,7 @@ import { Provenance } from "@/components/Provenance";
 import { RaceSlider } from "@/components/RaceSlider";
 import { ScheduleCard } from "@/components/ScheduleCard";
 import { MONTHS, hourLabel } from "@/lib/api";
-import { hoursForMonth, loadDataset, type StaticDataset } from "@/lib/dataset";
+import { hoursForMonth, loadDataset, provenanceFor, type StaticDataset } from "@/lib/dataset";
 import { exposureForWindow, flexibilityWindow } from "@/lib/exposure";
 import { optimize } from "@/lib/optimizer";
 import type {
@@ -64,13 +64,14 @@ export function Dashboard() {
     if (!dataset) return;
     const circuit =
       dataset.circuits.find((item) => item.id === circuitId) ?? dataset.circuits[0];
-    const hours = hoursForMonth(dataset, month);
+    const hours = hoursForMonth(dataset, month, circuitId);
     const exposure = exposureForWindow(hours, 12, 360);
+    const provenance = provenanceFor(dataset, circuit.id);
     setHourly({
       circuit,
       month,
       hours,
-      provenance: dataset.provenance,
+      provenance,
     });
     setProfile({
       circuit,
@@ -81,7 +82,7 @@ export function Dashboard() {
       flexibility: flexibilityWindow(hours),
       volatility_label:
         exposure.volatility > 0.28 ? "HIGH" : exposure.volatility > 0.12 ? "MEDIUM" : "LOW",
-      provenance: dataset.provenance,
+      provenance,
     });
     setOptimizeResult(null);
   }, [dataset, circuitId, month]);
@@ -125,6 +126,11 @@ export function Dashboard() {
     [circuits, circuitId, profile, hourly],
   );
 
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("circuit");
+    if (fromUrl) setCircuitId(fromUrl);
+  }, []);
+
   async function generateScenarios() {
     if (!hourly || !dataset) return;
     setBusy(true);
@@ -165,7 +171,7 @@ export function Dashboard() {
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-f1">F1 Weather Resilience</p>
           <h1 className="mt-2 max-w-2xl text-3xl leading-tight sm:text-5xl">
-            What if the British GP started two hours earlier?
+            What if the {circuit?.event ?? "British Grand Prix"} started two hours earlier?
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
             Counterfactual planning from historical observations. Humans still own safety, sport, broadcast and logistics
@@ -178,7 +184,12 @@ export function Dashboard() {
             <select
               className="rounded-xl border border-stroke bg-panel px-3 py-2 text-sm text-foreground"
               value={circuitId}
-              onChange={(event) => setCircuitId(event.target.value)}
+              onChange={(event) => {
+                const nextId = event.target.value;
+                setCircuitId(nextId);
+                const nextCircuit = dataset?.circuits.find((item) => item.id === nextId);
+                if (nextCircuit?.typical_month) setMonth(nextCircuit.typical_month);
+              }}
             >
               {(circuits.length ? circuits : [{ id: "silverstone", name: "Silverstone Circuit" }]).map((item) => (
                 <option key={item.id} value={item.id}>
@@ -202,7 +213,13 @@ export function Dashboard() {
             </select>
           </label>
           <Link
-            href="/climate"
+            href="/circuits"
+            className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
+          >
+            Circuit history
+          </Link>
+          <Link
+            href={`/climate?circuit=${circuitId}`}
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
           >
             Climate profile

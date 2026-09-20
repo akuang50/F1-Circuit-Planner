@@ -55,10 +55,11 @@ python3 scripts/export_static_data.py
 
 ## Stack
 
-- **Data:** NOAA ISD global-hourly CSV from `s3://noaa-global-hourly-pds` (same dataset as `s3://noaa-isd-pds`)
-- **Station:** Church Lawford `03544099999`, ~39 km from Silverstone, 2010–2025
+- **Data:** NOAA ISD global-hourly CSV from `s3://noaa-global-hourly-pds`
+- **Weather circuits:** 2026 calendar plus Bahrain, Jeddah and Imola, each pinned to a nearby ISD station in `data/metadata/stations.json`
+- **History:** every World Championship venue since 1950 on `/circuits`
 - **Static app:** Next.js export, TypeScript optimizer, Tailwind, Leaflet
-- **Optional pipeline:** Python, FastAPI, Polars, DuckDB (download/parse NOAA ISD and rebuild JSON)
+- **Optional pipeline:** `python3 scripts/ingest_all.py` then `python3 scripts/export_static_data.py`
 
 ## Local development
 

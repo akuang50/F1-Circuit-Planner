@@ -17,11 +17,9 @@ def run(script: str) -> None:
 
 
 def main() -> None:
-    run("download_isd.py")
-    run("parse_isd.py")
-    run("build_features.py")
-    print("\nDemo data ready. Start the API with:")
-    print("  cd backend && .venv/bin/uvicorn main:app --reload --port 8000")
+    run("ingest_all.py")
+    print("\nDemo data ready. Export static JSON with:")
+    print("  python3 scripts/export_static_data.py")
 
 
 if __name__ == "__main__":
