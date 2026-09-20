@@ -35,25 +35,3 @@ export function parseHour(value: string): number {
   const [h, m] = value.split(":").map(Number);
   return h + m / 60;
 }
-
-export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(path);
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(body || `Request failed: ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-}
-
-export async function apiPost<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(body || `Request failed: ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-}

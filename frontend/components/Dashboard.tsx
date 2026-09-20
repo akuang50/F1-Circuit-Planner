@@ -9,8 +9,10 @@ import { HourlyChart } from "@/components/HourlyChart";
 import { Provenance } from "@/components/Provenance";
 import { RaceSlider } from "@/components/RaceSlider";
 import { ScheduleCard } from "@/components/ScheduleCard";
-import { MONTHS, apiGet, apiPost, hourLabel } from "@/lib/api";
-import { exposureForWindow } from "@/lib/exposure";
+import { MONTHS, hourLabel } from "@/lib/api";
+import { hoursForMonth, loadDataset, type StaticDataset } from "@/lib/dataset";
+import { exposureForWindow, flexibilityWindow } from "@/lib/exposure";
+import { optimize } from "@/lib/optimizer";
 import type {
   CandidateSchedule,
   Circuit,
@@ -28,13 +30,14 @@ const CircuitMap = dynamic(
 const ORIGINAL_START = 16;
 
 export function Dashboard() {
+  const [dataset, setDataset] = useState<StaticDataset | null>(null);
   const [circuits, setCircuits] = useState<Circuit[]>([]);
   const [circuitId, setCircuitId] = useState("silverstone");
   const [month, setMonth] = useState(7);
   const [raceHour, setRaceHour] = useState(13);
   const [profile, setProfile] = useState<WeatherProfileResponse | null>(null);
   const [hourly, setHourly] = useState<WeatherByHourResponse | null>(null);
-  const [optimize, setOptimize] = useState<OptimizeResponse | null>(null);
+  const [optimizeResult, setOptimizeResult] = useState<OptimizeResponse | null>(null);
   const [weatherWeight, setWeatherWeight] = useState(1);
   const [scheduleWeight, setScheduleWeight] = useState(0.6);
   const [broadcastWeight, setBroadcastWeight] = useState(0.4);
@@ -42,25 +45,12 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGet<{ circuits: Circuit[] }>("/api/circuits")
-      .then((data) => setCircuits(data.circuits))
-      .catch((err: Error) => setError(err.message));
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
-    setError(null);
-    setOptimize(null);
-    Promise.all([
-      apiGet<WeatherProfileResponse>(
-        `/api/circuits/${circuitId}/weather-profile?month=${month}&start_hour=12&end_hour=18`,
-      ),
-      apiGet<WeatherByHourResponse>(`/api/circuits/${circuitId}/weather-by-hour?month=${month}`),
-    ])
-      .then(([profileData, hourlyData]) => {
+    loadDataset()
+      .then((data) => {
         if (cancelled) return;
-        setProfile(profileData);
-        setHourly(hourlyData);
+        setDataset(data);
+        setCircuits(data.circuits);
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);
@@ -68,7 +58,33 @@ export function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [circuitId, month]);
+  }, []);
+
+  useEffect(() => {
+    if (!dataset) return;
+    const circuit =
+      dataset.circuits.find((item) => item.id === circuitId) ?? dataset.circuits[0];
+    const hours = hoursForMonth(dataset, month);
+    const exposure = exposureForWindow(hours, 12, 360);
+    setHourly({
+      circuit,
+      month,
+      hours,
+      provenance: dataset.provenance,
+    });
+    setProfile({
+      circuit,
+      month,
+      start_hour: 12,
+      end_hour: 18,
+      exposure,
+      flexibility: flexibilityWindow(hours),
+      volatility_label:
+        exposure.volatility > 0.28 ? "HIGH" : exposure.volatility > 0.12 ? "MEDIUM" : "LOW",
+      provenance: dataset.provenance,
+    });
+    setOptimizeResult(null);
+  }, [dataset, circuitId, month]);
 
   const scenario = useMemo<ScenarioResponse | null>(() => {
     const hours = hourly?.hours ?? [];
@@ -110,12 +126,17 @@ export function Dashboard() {
   );
 
   async function generateScenarios() {
+    if (!hourly || !dataset) return;
     setBusy(true);
     setError(null);
     try {
-      const result = await apiPost<OptimizeResponse>("/api/optimize", {
-        circuit: circuitId,
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      const result = optimize({
+        circuit: hourly.circuit,
         month,
+        hours: hourly.hours,
+        sessions: dataset.sessions,
+        provenance: hourly.provenance,
         weights: {
           precipitation: weatherWeight,
           wind: weatherWeight * 0.5,
@@ -126,7 +147,7 @@ export function Dashboard() {
           broadcast: broadcastWeight,
         },
       });
-      setOptimize(result);
+      setOptimizeResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Optimize failed");
     } finally {
@@ -189,9 +210,7 @@ export function Dashboard() {
       </header>
 
       {error ? (
-        <p className="rounded-xl border border-f1/40 bg-f1/10 px-4 py-3 text-sm">
-          {error}. Start the API on port 8000 if it is not running.
-        </p>
+        <p className="rounded-xl border border-f1/40 bg-f1/10 px-4 py-3 text-sm">{error}</p>
       ) : null}
 
       <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -276,10 +295,10 @@ export function Dashboard() {
           <WeightSlider label="Schedule fidelity" value={scheduleWeight} onChange={setScheduleWeight} />
           <WeightSlider label="Broadcast window" value={broadcastWeight} onChange={setBroadcastWeight} />
         </div>
-        {optimize ? (
+        {optimizeResult ? (
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <ScheduleCard schedule={optimize.baseline} featured />
-            {optimize.candidates.map((candidate: CandidateSchedule) => (
+            <ScheduleCard schedule={optimizeResult.baseline} featured />
+            {optimizeResult.candidates.map((candidate: CandidateSchedule) => (
               <ScheduleCard key={candidate.id} schedule={candidate} />
             ))}
           </div>

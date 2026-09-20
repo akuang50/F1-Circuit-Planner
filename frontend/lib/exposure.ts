@@ -48,6 +48,74 @@ function weighted(hours: HourlyProfile[], field: keyof HourlyProfile, weights: [
   return wsum ? acc / wsum : 0;
 }
 
+export function weatherCost(
+  exposure: WeatherExposure,
+  weights: {
+    precipitation?: number;
+    wind?: number;
+    gust?: number;
+    visibility?: number;
+    temperature?: number;
+    volatility?: number;
+  },
+): number {
+  return (
+    (weights.precipitation ?? 1) * exposure.precipitation +
+    (weights.wind ?? 0.5) * exposure.strong_wind +
+    (weights.gust ?? 0.8) * exposure.strong_gust +
+    (weights.visibility ?? 0.7) * exposure.low_visibility +
+    (weights.temperature ?? 0.3) * exposure.temperature_extreme +
+    (weights.volatility ?? 0.5) * exposure.volatility
+  );
+}
+
+export function flexibilityWindow(
+  hours: HourlyProfile[],
+  durationMinutes = 120,
+  startHours: number[] = [12, 13, 14, 15, 16, 17],
+  tolerance = 0.03,
+): {
+  best_start_hour: number;
+  window_start_hour: number;
+  window_end_hour: number;
+  flexibility_minutes: number;
+  note: string;
+} {
+  const weights = {
+    precipitation: 1,
+    wind: 0.5,
+    gust: 0.8,
+    visibility: 0.7,
+    temperature: 0.3,
+    volatility: 0.5,
+  };
+  if (!hours.length) {
+    return {
+      best_start_hour: startHours[0] ?? 12,
+      window_start_hour: startHours[0] ?? 12,
+      window_end_hour: startHours[startHours.length - 1] ?? 17,
+      flexibility_minutes: 0,
+      note: "Historical scheduling flexibility, not a safety guarantee.",
+    };
+  }
+  const scored = startHours.map((hour) => {
+    const exp = exposureForWindow(hours, hour, durationMinutes);
+    return { hour, cost: weatherCost(exp, weights) };
+  });
+  scored.sort((a, b) => a.cost - b.cost);
+  const best = scored[0];
+  const nearby = scored.filter((row) => Math.abs(row.cost - best.cost) <= tolerance).map((row) => row.hour);
+  const window_start_hour = Math.min(...nearby);
+  const window_end_hour = Math.max(...nearby);
+  return {
+    best_start_hour: best.hour,
+    window_start_hour,
+    window_end_hour,
+    flexibility_minutes: Math.max(0, (window_end_hour - window_start_hour) * 60),
+    note: "Historical scheduling flexibility, not a safety guarantee.",
+  };
+}
+
 export function exposureForWindow(
   hours: HourlyProfile[],
   startHour: number,

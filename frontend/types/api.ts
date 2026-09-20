@@ -43,6 +43,7 @@ export type StationProvenance = {
 };
 
 export type HourlyProfile = {
+  month?: number;
   hour: number;
   observation_count: number;
   rain_probability: number | null;

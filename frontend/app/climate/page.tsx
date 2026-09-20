@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Provenance } from "@/components/Provenance";
-import { MONTHS, apiGet, pct } from "@/lib/api";
+import { MONTHS, pct } from "@/lib/api";
+import { loadDataset } from "@/lib/dataset";
 import type { ClimateProfileResponse } from "@/types/api";
 
 export default function ClimatePage() {
@@ -11,8 +12,14 @@ export default function ClimatePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGet<ClimateProfileResponse>("/api/circuits/silverstone/climate")
-      .then(setData)
+    loadDataset()
+      .then((dataset) => {
+        setData({
+          circuit: dataset.circuits[0],
+          months: dataset.monthly,
+          provenance: dataset.provenance,
+        });
+      })
       .catch((err: Error) => setError(err.message));
   }, []);
 
