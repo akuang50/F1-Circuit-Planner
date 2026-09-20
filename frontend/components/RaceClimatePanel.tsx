@@ -99,7 +99,7 @@ export function RaceClimatePanel({
                   >
                     <span>
                       <span className="font-mono text-xs text-muted">{race.season}</span>{" "}
-                      {race.wet is True ? "Wet climate day" : race.wet is False ? "Dry climate day" : "ERA5 not yet in"}
+                      {race.wet === true ? "Wet climate day" : race.wet === false ? "Dry climate day" : "ERA5 not yet in"}
                       {race.winner ? <span className="text-muted"> · {race.winner}</span> : null}
                     </span>
                     <span className={`font-mono text-xs ${race.wet ? "text-teal" : "text-muted"}`}>
