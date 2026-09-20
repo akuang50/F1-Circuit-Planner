@@ -75,8 +75,11 @@ export function CircuitDiagram({
         <text x={start.x + 10} y={start.y - 10} fill="#f4f1ea" fontSize="10" fontFamily="inherit">
           S/F
         </text>
-        {labels.map((label) =>
-          label.name === "Start/finish" ? null : (
+        {labels.map((label) => {
+          if (label.name === "Start/finish") return null;
+          const dist = Math.hypot(label.x - start.x, label.y - start.y);
+          if (dist < 28) return null;
+          return (
             <text
               key={`${guide.id}-${label.name}`}
               x={label.x}
@@ -88,8 +91,8 @@ export function CircuitDiagram({
             >
               {label.name}
             </text>
-          ),
-        )}
+          );
+        })}
         {climbs.map((point, index) => (
           <g key={`${guide.id}-climb-${index}`}>
             <polygon
@@ -154,7 +157,7 @@ export function ElevationProfile({ guide }: { guide: CircuitGuide }) {
           <g key={`${c.name}-${c.x}`}>
             <circle cx={c.x} cy={c.y} r="2.5" fill="#f2b90d" />
             <text x={c.x} y={Math.max(12, c.y - 8)} fill="rgba(244,241,234,0.7)" fontSize="9" textAnchor="middle">
-              {c.name}
+              {c.name === "Start/finish" ? "S/F" : c.name}
             </text>
           </g>
         ))}
