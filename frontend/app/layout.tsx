@@ -18,7 +18,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "F1 Weather Resilience",
   description:
-    "Historical NOAA ISD scenario analysis for Formula 1 race-weekend scheduling. Not a weather forecast.",
+    "Historical NOAA ISD scenario analysis for Formula 1 race-weekend scheduling, with ERA5 climate and OpenF1 session weather. Not a weather forecast.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

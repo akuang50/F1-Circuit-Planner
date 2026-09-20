@@ -5,22 +5,26 @@ import { CircuitDiagram, ElevationProfile } from "@/components/CircuitDiagram";
 import { CircuitTrack3D } from "@/components/CircuitTrack3D";
 import { TireChoice } from "@/components/TireChoice";
 import { getCircuitGuide } from "@/lib/circuitGuides";
+import { extrasFor } from "@/lib/extras";
 import { adviseTires } from "@/lib/tireAdvice";
-import type { WeatherExposure } from "@/types/api";
+import type { CircuitExtras, ExtrasDataset, WeatherExposure } from "@/types/api";
 
 export function CircuitGuidePanel({
   circuitId,
   month,
   exposure,
+  extras = null,
 }: {
   circuitId: string;
   month: number;
   exposure: WeatherExposure | null;
+  extras?: ExtrasDataset | CircuitExtras | null;
 }) {
   const [mode, setMode] = useState<"3d" | "2d">("3d");
   const guide = getCircuitGuide(circuitId);
   if (!guide || !exposure) return null;
-  const advice = adviseTires(guide, exposure, month);
+  const circuitExtras = extras && "circuits" in extras ? extrasFor(extras, circuitId) : extras;
+  const advice = adviseTires(guide, exposure, month, circuitExtras);
   const wet = advice.wetScore >= 0.22;
 
   return (

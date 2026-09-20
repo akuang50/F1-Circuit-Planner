@@ -1,6 +1,7 @@
 import { MONTHS, pct } from "@/lib/api";
 import type { CircuitGuide } from "@/lib/circuitGuides";
-import type { WeatherExposure } from "@/types/api";
+import { climateForMonth, degC, latestMeeting, mm } from "@/lib/extras";
+import type { CircuitExtras, WeatherExposure } from "@/types/api";
 
 export type CompoundId = 1 | 2 | 3 | 4 | 5;
 export type RainTyre = "slicks" | "intermediates" | "wets" | "crossover";
@@ -10,6 +11,7 @@ export type TireAdvice = {
   rainTyre: RainTyre;
   wetScore: number;
   precipUsable: boolean;
+  era5Used: boolean;
   headline: string;
   detail: string;
   reasons: string[];
@@ -35,13 +37,20 @@ export function adviseTires(
   guide: CircuitGuide,
   exposure: WeatherExposure,
   month: number,
+  extras: CircuitExtras | null = null,
 ): TireAdvice {
   const climate =
     guide.wetTendency === "seasonal-storms" && !guide.stormMonths.includes(month)
       ? CLIMATE_WET["occasional"]
       : CLIMATE_WET[guide.wetTendency];
+  const era5 = climateForMonth(extras, month);
+  const era5Rain = era5?.rain_day_fraction ?? null;
   const precipUsable = precipIsUsable(exposure.precipitation);
-  const wetScore = precipUsable ? climate * 0.35 + exposure.precipitation * 0.65 : climate;
+  const wetScore = precipUsable
+    ? climate * 0.35 + exposure.precipitation * 0.65
+    : era5Rain != null
+      ? climate * 0.25 + era5Rain * 0.75
+      : climate;
   const heat = exposure.temperature_extreme;
   const vis = exposure.low_visibility;
   const vol = exposure.volatility;
@@ -77,8 +86,25 @@ export function adviseTires(
   reasons.push(
     precipUsable
       ? `NOAA ISD rain in the ${monthName} afternoon window: ${pct(exposure.precipitation)} of hours.`
-      : `ISD precipitation for this pin is missing or stuck, so the wet call leans on ${guide.climateFamily} climatology, not a rain percentage.`,
+      : era5Rain != null
+        ? `ISD precipitation for this pin is missing or stuck. ERA5 reanalysis at the circuit: rain (≥1 mm) on ${pct(era5Rain)} of ${monthName} days (${era5?.rain_days ?? 0} of ${era5?.days ?? 0}).`
+        : `ISD precipitation for this pin is missing or stuck, so the wet call leans on ${guide.climateFamily} climatology, not a rain percentage.`,
   );
+  const raceSummary = extras?.race_day_summary;
+  if (raceSummary && raceSummary.races > 0) {
+    reasons.push(
+      `Of ${raceSummary.races} Grands Prix here since ${raceSummary.first_season}, ERA5 shows ≥1 mm on race day for ${raceSummary.wet_races} (${pct(raceSummary.wet_fraction)}). That is the climate on Sunday, not a lap-by-lap race log.`,
+    );
+  }
+  const meeting = latestMeeting(extras);
+  if (meeting?.mean_track_temp_c != null) {
+    reasons.push(
+      `OpenF1 session weather, ${meeting.year} ${meeting.meeting_name ?? "GP"}: mean track ${degC(meeting.mean_track_temp_c)}, air ${degC(meeting.mean_air_temp_c)}, rain flag in ${pct(meeting.rainfall_fraction)} of samples.`,
+    );
+  }
+  if (era5?.mean_precip_mm != null && precipUsable === false) {
+    reasons.push(`ERA5 mean daily rainfall in ${monthName}: ${mm(era5.mean_precip_mm)}.`);
+  }
   if (heat > 0.2) {
     reasons.push(
       `High-temperature hours: ${pct(heat)}. Harder slicks (${slickLabel}) to survive thermal degradation.`,
@@ -115,7 +141,7 @@ export function adviseTires(
   const headline = `${monthName}: ${slickLabel} dry, ${rainLabel}`;
   const detail = `${guide.tireCopy} This is a climate reading, not Pirelli’s allocation and not a race-day call.`;
 
-  return { slicks, rainTyre, wetScore, precipUsable, headline, detail, reasons };
+  return { slicks, rainTyre, wetScore, precipUsable, era5Used: !precipUsable && era5Rain != null, headline, detail, reasons };
 }
 
 export const COMPOUND_LABELS: Record<CompoundId, { name: string; hint: string; color: string }> = {

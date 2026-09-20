@@ -4,13 +4,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CircuitGuidePanel } from "@/components/CircuitGuidePanel";
 import { Provenance } from "@/components/Provenance";
+import { RaceClimatePanel } from "@/components/RaceClimatePanel";
 import { MONTHS, pct } from "@/lib/api";
 import { loadDataset, monthlyForCircuit, provenanceFor, type StaticDataset } from "@/lib/dataset";
+import { extrasFor, loadExtras, mm } from "@/lib/extras";
 import { exposureFromMonthly } from "@/lib/exposure";
-import type { Circuit, ClimateProfileResponse } from "@/types/api";
+import type { Circuit, ClimateProfileResponse, ExtrasDataset } from "@/types/api";
 
 export default function ClimatePage() {
   const [dataset, setDataset] = useState<StaticDataset | null>(null);
+  const [extras, setExtras] = useState<ExtrasDataset | null>(null);
   const [circuitId, setCircuitId] = useState("silverstone");
   const [data, setData] = useState<ClimateProfileResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +28,9 @@ export default function ClimatePage() {
         }
       })
       .catch((err: Error) => setError(err.message));
+    loadExtras()
+      .then(setExtras)
+      .catch(() => setExtras(null));
   }, []);
 
   useEffect(() => {
@@ -50,8 +56,8 @@ export default function ClimatePage() {
           <p className="text-xs uppercase tracking-[0.28em] text-f1">Circuit climate profile</p>
           <h1 className="mt-2 text-4xl">{data?.circuit.name ?? "Circuit"}, year-round</h1>
           <p className="mt-3 max-w-xl text-sm text-muted">
-            Long-term monthly exposure from the pinned NOAA ISD station. Useful for calendar questions, not race-day
-            calls.
+            NOAA ISD monthly exposure from the pinned station, with Open-Meteo ERA5 rain-day climate at the circuit
+            itself. Useful for calendar questions, not race-day calls.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -80,14 +86,18 @@ export default function ClimatePage() {
           circuitId={data.circuit.id}
           month={data.circuit.typical_month ?? 7}
           exposure={exposureFromMonthly(data.months.find((row) => row.month === (data.circuit.typical_month ?? 7)))}
+          extras={extras}
         />
       ) : null}
+      {extras ? <RaceClimatePanel circuitId={circuitId} month={data?.circuit.typical_month ?? 7} extras={extras} /> : null}
       <div className="overflow-x-auto rounded-3xl border border-stroke bg-panel p-5">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.16em] text-muted">
             <tr>
               <th className="pb-3">Month</th>
-              <th className="pb-3">Rain</th>
+              <th className="pb-3">ISD rain</th>
+              <th className="pb-3">ERA5 rain days</th>
+              <th className="pb-3">ERA5 mean rain</th>
               <th className="pb-3">Gusts</th>
               <th className="pb-3">Visibility</th>
               <th className="pb-3">Heat</th>
@@ -95,12 +105,18 @@ export default function ClimatePage() {
             </tr>
           </thead>
           <tbody>
-            {data?.months.map((row) => (
+            {data?.months.map((row) => {
+              const era5 = extrasFor(extras, circuitId)?.climate.find((item) => item.month === row.month);
+              return (
               <tr key={row.month} className="border-t border-stroke">
                 <td className="py-3">{MONTHS[row.month - 1]}</td>
                 <td className="py-3 font-mono">
                   <Bar value={row.rain_probability} /> {pct(row.rain_probability, 0)}
                 </td>
+                <td className="py-3 font-mono">
+                  <Bar value={era5?.rain_day_fraction ?? null} color="teal" /> {pct(era5?.rain_day_fraction, 0)}
+                </td>
+                <td className="py-3 font-mono">{mm(era5?.mean_precip_mm)}</td>
                 <td className="py-3 font-mono">
                   <Bar value={row.strong_gust_probability} color="teal" /> {pct(row.strong_gust_probability, 0)}
                 </td>
@@ -110,7 +126,8 @@ export default function ClimatePage() {
                 <td className="py-3 font-mono">{pct(row.high_temperature_probability, 0)}</td>
                 <td className="py-3">{row.volatility_label}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

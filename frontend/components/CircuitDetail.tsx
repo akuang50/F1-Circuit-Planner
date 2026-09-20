@@ -4,18 +4,21 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CircuitDiagram, ElevationProfile } from "@/components/CircuitDiagram";
 import { CircuitTrack3D } from "@/components/CircuitTrack3D";
+import { RaceClimatePanel } from "@/components/RaceClimatePanel";
 import { TireChoice } from "@/components/TireChoice";
 import { MONTHS } from "@/lib/api";
 import { getCircuitGuide, type CircuitGuide } from "@/lib/circuitGuides";
 import { layoutHref } from "@/lib/circuitNav";
 import { hoursForMonth, loadDataset, monthlyForCircuit, type StaticDataset } from "@/lib/dataset";
+import { extrasFor, loadExtras } from "@/lib/extras";
 import { exposureForWindow, exposureFromMonthly } from "@/lib/exposure";
 import { adviseTires } from "@/lib/tireAdvice";
-import type { Circuit } from "@/types/api";
+import type { Circuit, CircuitExtras, ExtrasDataset } from "@/types/api";
 
 export function CircuitDetail({ circuit }: { circuit: Circuit }) {
   const guide = getCircuitGuide(circuit.id);
   const [dataset, setDataset] = useState<StaticDataset | null>(null);
+  const [extras, setExtras] = useState<ExtrasDataset | null>(null);
   const [month, setMonth] = useState(circuit.typical_month ?? 7);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +26,9 @@ export function CircuitDetail({ circuit }: { circuit: Circuit }) {
     loadDataset()
       .then(setDataset)
       .catch((err: Error) => setError(err.message));
+    loadExtras()
+      .then(setExtras)
+      .catch(() => setExtras(null));
   }, []);
 
   const exposure = useMemo(() => {
@@ -66,7 +72,8 @@ export function CircuitDetail({ circuit }: { circuit: Circuit }) {
         </Link>
       </div>
       {error ? <p className="text-f1">{error}</p> : null}
-      <GuideBody guide={guide} month={month} exposure={exposure} />
+      <GuideBody guide={guide} month={month} exposure={exposure} extras={extrasFor(extras, circuit.id)} />
+      {extras ? <RaceClimatePanel circuitId={circuit.id} month={month} extras={extras} /> : null}
     </div>
   );
 }
@@ -75,12 +82,14 @@ function GuideBody({
   guide,
   month,
   exposure,
+  extras,
 }: {
   guide: CircuitGuide;
   month: number;
   exposure: ReturnType<typeof exposureForWindow> | null;
+  extras: CircuitExtras | null;
 }) {
-  const advice = exposure ? adviseTires(guide, exposure, month) : null;
+  const advice = exposure ? adviseTires(guide, exposure, month, extras) : null;
   const wet = (advice?.wetScore ?? 0) >= 0.22;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
