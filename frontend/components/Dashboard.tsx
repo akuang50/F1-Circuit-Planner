@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CircuitGuidePanel } from "@/components/CircuitGuidePanel";
 import { Counterfactual } from "@/components/Counterfactual";
 import { ExposureList, MetricBar } from "@/components/MetricBar";
 import { HourlyChart } from "@/components/HourlyChart";
@@ -213,6 +214,12 @@ export function Dashboard() {
             </select>
           </label>
           <Link
+            href={`/circuits/${circuitId}`}
+            className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
+          >
+            Circuit diagram
+          </Link>
+          <Link
             href="/circuits"
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
           >
@@ -295,6 +302,10 @@ export function Dashboard() {
           {circuit && profile ? <CircuitMap circuit={circuit} provenance={profile.provenance} /> : null}
         </div>
       </section>
+
+      {circuit && afternoonExposure ? (
+        <CircuitGuidePanel circuitId={circuit.id} month={month} exposure={afternoonExposure} />
+      ) : null}
 
       <section className="rounded-3xl border border-stroke bg-panel p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

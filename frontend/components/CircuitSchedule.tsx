@@ -48,9 +48,14 @@ export function YearSchedule({ circuits }: { circuits: CircuitHistoryEntry[] }) 
               {row.country} · {row.grands_prix.join(", ")}
             </p>
             {row.weather_circuit_id ? (
-              <Link href={`/?circuit=${row.weather_circuit_id}`} className="mt-2 inline-block text-sm text-teal hover:underline">
-                Open weather planner
-              </Link>
+              <p className="mt-2 flex flex-wrap gap-3">
+                <Link href={`/?circuit=${row.weather_circuit_id}`} className="text-sm text-teal hover:underline">
+                  Open weather planner
+                </Link>
+                <Link href={`/circuits/${row.weather_circuit_id}`} className="text-sm text-teal hover:underline">
+                  Layout and tyres
+                </Link>
+              </p>
             ) : (
               <p className="mt-2 text-xs text-muted">No NOAA profile in this app</p>
             )}
@@ -96,6 +101,7 @@ export function CircuitTable({ circuits }: { circuits: CircuitHistoryEntry[] }) 
               <th className="pb-3">Seasons</th>
               <th className="pb-3">Races</th>
               <th className="pb-3">Weather</th>
+              <th className="pb-3">Diagram</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +125,15 @@ export function CircuitTable({ circuits }: { circuits: CircuitHistoryEntry[] }) 
                     </Link>
                   ) : (
                     <span className="text-muted">History only</span>
+                  )}
+                </td>
+                <td className="py-3">
+                  {row.weather_circuit_id ? (
+                    <Link href={`/circuits/${row.weather_circuit_id}`} className="text-teal hover:underline">
+                      Layout and tyres
+                    </Link>
+                  ) : (
+                    <span className="text-muted">—</span>
                   )}
                 </td>
               </tr>
