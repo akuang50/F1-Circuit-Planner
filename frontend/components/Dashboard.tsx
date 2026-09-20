@@ -168,7 +168,8 @@ export function Dashboard() {
             What if the British GP started two hours earlier?
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
-            Counterfactual planning from historical observations. Humans still own safety, sport, broadcast and logistics.
+            Counterfactual planning from historical observations. Humans still own safety, sport, broadcast and logistics
+            — the lesson Formula 1 relearned in the wet at Suzuka in 2014.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -205,6 +206,12 @@ export function Dashboard() {
             className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
           >
             Climate profile
+          </Link>
+          <Link
+            href="/safety"
+            className="self-end rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
+          >
+            Safety history
           </Link>
         </div>
       </header>
@@ -305,6 +312,27 @@ export function Dashboard() {
         ) : (
           <p className="mt-6 text-sm text-muted">Generate at least three valid weekend schedules to compare weather vs disruption.</p>
         )}
+      </section>
+
+      <section className="rounded-3xl border border-stroke bg-panel p-5">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted">Formula 1 safety history</p>
+        <h2 className="mt-1 text-2xl">The wet taught the sport to slow the field</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+          On 5 October 2014 Jules Bianchi crashed in the rain at Suzuka, striking a recovery vehicle. He died the next
+          July. The FIA’s answer was not a cleverer forecast. It was the Virtual Safety Car in 2015: an enforced slow
+          zone so cranes are not sharing the road with cars at speed. Halo (2018) came from a longer head-protection
+          programme and later proved itself — including Zhou Guanyu at this circuit in 2022.
+        </p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+          Imola 1994, debris accidents in 2009, Bahrain 2020: each one bought a rule, a barrier, or a piece of the car.
+          This NOAA table is none of those things.
+        </p>
+        <Link
+          href="/safety"
+          className="mt-4 inline-block rounded-xl border border-stroke px-4 py-2 text-sm hover:border-white/30"
+        >
+          Full safety timeline
+        </Link>
       </section>
 
       {profile ? <Provenance data={profile.provenance} /> : null}

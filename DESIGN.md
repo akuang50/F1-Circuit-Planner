@@ -62,6 +62,8 @@ Session times are prototype assumptions, not FIA regulations (`data/metadata/ses
 - `POST /api/scenario`
 - `POST /api/optimize`
 
+The static Pages app also has `/safety`: public F1 safety history (Bianchi 2014, VSC, halo). It is context, not race control.
+
 ## Out of scope
 
 Forecasts, FIA race control, full 24-circuit calendars, ticket sales, telemetry, autonomous decisions.
